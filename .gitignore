@@ -1,0 +1,15 @@
+# env / build
+.venv/
+__pycache__/
+*.pyc
+
+# binaries and objects
+*.o
+nbody
+nbody_omp
+nbody_mpi
+nbody_mpi_omp
+nbody_mpi_shared
+
+# results
+results/
