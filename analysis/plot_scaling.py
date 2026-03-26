@@ -1,10 +1,10 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 
 os.makedirs("reports", exist_ok=True)
 
-# ----- Serial log-log runtime vs N -----
+# ---------- Serial runtime vs N ----------
 serial = pd.read_csv("results/serial_times.csv")
 plt.figure()
 plt.loglog(serial["N"], serial["seconds"], marker="o")
@@ -14,41 +14,25 @@ plt.title("Serial runtime vs N")
 plt.tight_layout()
 plt.savefig("reports/serial_runtime_vs_N.png", dpi=200)
 
-# ----- OpenMP runtime + speedup -----
+# ---------- OpenMP timings ----------
 omp = pd.read_csv("results/omp_times_N1024.csv")
-t1 = float(omp.loc[omp["threads"] == 1, "seconds"].iloc[0])
-omp["speedup"] = t1 / omp["seconds"]
-omp["efficiency"] = omp["speedup"] / omp["threads"]
+t1_omp = float(omp.loc[omp["threads"] == 1, "seconds"].iloc[0])
+omp["speedup"] = t1_omp / omp["seconds"]
 
-plt.figure()
-plt.plot(omp["threads"], omp["seconds"], marker="o")
-plt.xlabel("Threads")
-plt.ylabel("Runtime (s)")
-plt.title("OpenMP runtime vs threads (N=1024)")
-plt.tight_layout()
-plt.savefig("reports/omp_runtime_N1024.png", dpi=200)
+# ---------- MPI timings ----------
+mpi = pd.read_csv("reports/data/mpi_times_N1024.csv")
+t1_mpi = float(mpi.loc[mpi["ranks"] == 1, "seconds"].iloc[0])
+mpi["speedup"] = t1_mpi / mpi["seconds"]
 
+# ---------- Comparison speedup plot ----------
 plt.figure()
-plt.plot(omp["threads"], omp["speedup"], marker="o")
-plt.xlabel("Threads")
+plt.plot(omp["threads"], omp["speedup"], marker="o", label="OpenMP speedup (N=1024)")
+plt.plot(mpi["ranks"], mpi["speedup"], marker="o", label="MPI speedup (N=1024)")
+plt.xlabel("Parallelism (threads or ranks)")
 plt.ylabel("Speedup")
-plt.title("OpenMP speedup vs threads (N=1024)")
+plt.title("Speedup comparison: OpenMP vs MPI")
+plt.legend()
 plt.tight_layout()
-plt.savefig("reports/omp_speedup_N1024.png", dpi=200)
+plt.savefig("reports/speedup_compare_omp_vs_mpi_N1024.png", dpi=200)
 
-plt.figure()
-plt.plot(omp["threads"], omp["efficiency"], marker="o")
-plt.xlabel("Threads")
-plt.ylabel("Efficiency")
-plt.title("OpenMP efficiency vs threads (N=1024)")
-plt.tight_layout()
-plt.savefig("reports/omp_efficiency_N1024.png", dpi=200)
-
-print("Wrote plots to reports/:")
-for fn in [
-    "serial_runtime_vs_N.png",
-    "omp_runtime_N1024.png",
-    "omp_speedup_N1024.png",
-    "omp_efficiency_N1024.png",
-]:
-    print("  -", os.path.join("reports", fn))
+print("Wrote reports/speedup_compare_omp_vs_mpi_N1024.png")
