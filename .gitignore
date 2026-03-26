@@ -13,3 +13,12 @@ nbody_mpi_shared
 
 # results
 results/
+# Slurm output
+slurm-*.out
+
+# editor backups
+*.save
+*~
+
+# accidental files
+0
